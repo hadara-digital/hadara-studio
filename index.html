@@ -83,9 +83,6 @@
       <label class="q" for="wish">מה אתם רוצים לקבל?</label>
       <textarea id="wish" placeholder="למשל: להוריד את ה&quot;אממ&quot; והשתיקות, כתוביות, כותרת בהתחלה, מוזיקה שמחה. אפשר לכתוב חופשי."></textarea>
 
-      <label class="q" for="name">השם שלכם <small>(פעם אחת, נשמר בטלפון)</small></label>
-      <input type="text" id="name" placeholder="השם שלכם" maxlength="40" autocomplete="name">
-
       <button class="btn pink" id="send" type="button">להמשיך לשליחה במייל</button>
       <div class="err" id="err">כתבו לפחות משפט על מה אתם רוצים לקבל.</div>
     </div>
@@ -118,8 +115,6 @@
 <script>
   const TO = 'info@hadara.digital';
   const $ = (id) => document.getElementById(id);
-  const nameField = $('name');
-  try { nameField.value = localStorage.getItem('studio-name') || ''; } catch {}
 
   // בחירה אחת מהצ'יפים
   $('kind').addEventListener('click', (e) => {
@@ -132,10 +127,9 @@
     const kind = [...$('kind').children].find(c => c.getAttribute('aria-pressed') === 'true').dataset.v;
     const topic = $('topic').value.trim();
     const wish = $('wish').value.trim();
-    const name = nameField.value.trim();
     const subject = `לעריכה - ${topic || 'סרטון'}`;
     const body = [
-      name ? `היי הדר, זה ${name}.` : 'היי הדר,',
+      'היי הדר,',
       '',
       `סוג: ${kind}`,
       topic ? `על מה: ${topic}` : null,
@@ -173,7 +167,6 @@
   $('send').addEventListener('click', () => {
     if ($('wish').value.trim().length < 3) { $('err').classList.add('show'); $('wish').focus(); return; }
     $('err').classList.remove('show');
-    try { localStorage.setItem('studio-name', nameField.value.trim()); } catch {}
     last = compose();
     openMail(last);
     $('form').classList.add('hidden');
