@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>סטודיו של הדרה</title>
+<meta name="description" content="שולחים סרטון עם בקשה, מקבלים סרטון ערוך">
+<meta name="theme-color" content="#ff0565">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="סטודיו">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff0565; --blush: #ffd3df; --blush-soft: #fff0f5;
+    --cream: #fff7eb; --cream-soft: #fffaf3; --sky: #c8f8fc;
+    --ink: #12162f; --muted: #5c6180; --line: #f0e4d6;
+    --shadow: 0 6px 20px rgba(18,22,47,.07); --shadow-pink: 0 7px 17px rgba(255,22,112,.25);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); font-family: Assistant, Arial, sans-serif; }
+  body { min-height: 100dvh; padding: max(16px, env(safe-area-inset-top)) 16px 40px; }
+  main { max-width: 520px; margin: 0 auto; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 18px; }
+  header img.logo { height: 34px; }
+  header .face { width: 46px; height: 46px; border-radius: 14px; background: #fff; box-shadow: var(--shadow); object-fit: cover; }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; font-weight: 800; }
+  .lead { margin: 0 0 18px; color: var(--muted); font-size: 16px; }
+  .card { background: #fff; border-radius: 22px; padding: 18px 18px 20px; box-shadow: var(--shadow); border-inline-start: 5px solid var(--pink); }
+  label.q { display: block; font-weight: 700; margin: 16px 0 8px; font-size: 16px; }
+  label.q:first-of-type { margin-top: 2px; }
+  label.q small { color: var(--muted); font-weight: 400; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1.5px solid var(--line); background: var(--cream-soft); color: var(--ink); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 15px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--blush); border-color: var(--pink); font-weight: 700; }
+  input[type=text], textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 13px; font: inherit; font-size: 16px; background: var(--cream-soft); color: var(--ink); }
+  input:focus, textarea:focus { outline: none; border-color: var(--pink); background: #fff; }
+  textarea { min-height: 120px; resize: vertical; }
+  .btn { display: block; width: 100%; border: 0; border-radius: 999px; padding: 15px 18px; font: inherit; font-size: 18px; font-weight: 800; cursor: pointer; }
+  .btn.pink { background: var(--pink); color: #fff; box-shadow: var(--shadow-pink); margin-top: 20px; }
+  .btn.soft { background: var(--blush-soft); color: var(--ink); margin-top: 10px; font-weight: 700; font-size: 16px; }
+  .btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+  .steps { margin: 0; padding: 0 20px 0 0; }
+  .steps li { margin: 10px 0; font-size: 17px; line-height: 1.45; }
+  .steps b { color: var(--pink); }
+  .note { background: var(--sky); border-radius: 14px; padding: 12px 14px; font-size: 15px; margin-top: 16px; line-height: 1.5; }
+  .install { display: none; background: var(--blush-soft); border-radius: 14px; padding: 12px 14px; font-size: 15px; margin-top: 16px; line-height: 1.5; }
+  .install.show { display: block; }
+  footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 22px; line-height: 1.5; }
+  .hidden { display: none !important; }
+  .err { color: #c20042; font-weight: 700; margin-top: 10px; display: none; }
+  .err.show { display: block; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img class="logo" src="./logo.png" alt="הדרה דיגיטל">
+    <img class="face" src="./icon-192.png" alt="">
+  </header>
+
+  <section id="form">
+    <h1>שולחים סרטון, מקבלים סרטון ערוך</h1>
+    <p class="lead">ממלאים כאן מה רוצים, ובג'ימייל רק מצרפים את הסרטון.</p>
+
+    <div class="card">
+      <label class="q">מה לעשות עם הסרטון?</label>
+      <div class="chips" id="kind" role="group">
+        <button class="chip" type="button" aria-pressed="true" data-v="ריל אנכי (אינסטגרם / טיקטוק)">ריל אנכי</button>
+        <button class="chip" type="button" aria-pressed="false" data-v="סרטון רוחבי (יוטיוב)">סרטון רוחבי</button>
+        <button class="chip" type="button" aria-pressed="false" data-v="רק חיתוך וכתוביות, בלי גרפיקה">רק חיתוך וכתוביות</button>
+        <button class="chip" type="button" aria-pressed="false" data-v="תפתיעי אותי">תפתיעי אותי</button>
+      </div>
+
+      <label class="q" for="topic">על מה הסרטון? <small>(כמה מילים)</small></label>
+      <input type="text" id="topic" placeholder="למשל: הטיול לצפון, המתכון של סבתא" maxlength="80" autocomplete="off">
+
+      <label class="q" for="wish">מה אתם רוצים לקבל?</label>
+      <textarea id="wish" placeholder="למשל: להוריד את ה&quot;אממ&quot; והשתיקות, כתוביות, כותרת בהתחלה, מוזיקה שמחה. אפשר לכתוב חופשי."></textarea>
+
+      <label class="q" for="name">השם שלכם <small>(פעם אחת, נשמר בטלפון)</small></label>
+      <input type="text" id="name" placeholder="השם שלכם" maxlength="40" autocomplete="name">
+
+      <button class="btn pink" id="send" type="button">להמשיך לשליחה במייל</button>
+      <div class="err" id="err">כתבו לפחות משפט על מה אתם רוצים לקבל.</div>
+    </div>
+
+    <div class="install" id="install">
+      <b>כדי שזה יהיה כמו אפליקציה:</b> <span id="installText"></span>
+      <button class="btn soft hidden" id="installBtn" type="button">הוספה למסך הבית</button>
+    </div>
+  </section>
+
+  <section id="after" class="hidden">
+    <h1>עכשיו בג'ימייל</h1>
+    <p class="lead">המייל כבר מוכן. נשאר רק לצרף את הסרטון.</p>
+    <div class="card">
+      <ol class="steps">
+        <li>לוחצים על הסיכה <b>📎</b> ← <b>צירוף קובץ</b> ← בוחרים את הסרטון <b>מהגלריה</b> (לא מוואטסאפ, שם האיכות יורדת).</li>
+        <li>סרטון גדול? ג'ימייל יציע <b>לשלוח דרך Google Drive</b>. מאשרים.</li>
+        <li>אפשר לצרף גם תמונות, צילומי מסך או מצגת.</li>
+        <li>לוחצים <b>שלח</b>. זהו.</li>
+      </ol>
+      <div class="note">הסרטון הערוך יחזור אליכם במייל, לאותה כתובת ששלחתם ממנה.</div>
+      <button class="btn soft" id="again" type="button">לפתוח שוב את המייל</button>
+      <button class="btn soft" id="reset" type="button">בקשה חדשה</button>
+    </div>
+  </section>
+
+  <footer>הבקשה נשלחת ל-info@hadara.digital<br>סטודיו של הדרה דיגיטל</footer>
+</main>
+
+<script>
+  const TO = 'info@hadara.digital';
+  const $ = (id) => document.getElementById(id);
+  const nameField = $('name');
+  try { nameField.value = localStorage.getItem('studio-name') || ''; } catch {}
+
+  // בחירה אחת מהצ'יפים
+  $('kind').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    for (const c of $('kind').children) c.setAttribute('aria-pressed', String(c === chip));
+  });
+
+  function compose() {
+    const kind = [...$('kind').children].find(c => c.getAttribute('aria-pressed') === 'true').dataset.v;
+    const topic = $('topic').value.trim();
+    const wish = $('wish').value.trim();
+    const name = nameField.value.trim();
+    const subject = `לעריכה - ${topic || 'סרטון'}`;
+    const body = [
+      name ? `היי הדר, זה ${name}.` : 'היי הדר,',
+      '',
+      `סוג: ${kind}`,
+      topic ? `על מה: ${topic}` : null,
+      '',
+      'מה אני רוצה לקבל:',
+      wish,
+      '',
+      '(הסרטון מצורף למטה)',
+    ].filter(l => l !== null).join('\n');
+    return { subject, body };
+  }
+
+  let last = null;
+
+  function openMail({ subject, body }) {
+    const q = `subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const ua = navigator.userAgent;
+    const mobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    if (!mobile) {
+      // במחשב: חלון כתיבה של ג'ימייל בדפדפן
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(TO)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+      return;
+    }
+    const mailto = `mailto:${TO}?${q}`;
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      // באייפון: קודם אפליקציית ג'ימייל. אם היא לא מותקנת, אחרי שנייה נופלים ל-mailto (האפליקציה "דואר")
+      const started = Date.now();
+      window.location.href = `googlegmail://co?to=${encodeURIComponent(TO)}&${q}`;
+      setTimeout(() => { if (Date.now() - started < 1600 && !document.hidden) window.location.href = mailto; }, 1200);
+      return;
+    }
+    window.location.href = mailto;
+  }
+
+  $('send').addEventListener('click', () => {
+    if ($('wish').value.trim().length < 3) { $('err').classList.add('show'); $('wish').focus(); return; }
+    $('err').classList.remove('show');
+    try { localStorage.setItem('studio-name', nameField.value.trim()); } catch {}
+    last = compose();
+    openMail(last);
+    $('form').classList.add('hidden');
+    $('after').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  });
+  $('again').addEventListener('click', () => last && openMail(last));
+  $('reset').addEventListener('click', () => {
+    $('topic').value = ''; $('wish').value = '';
+    for (const c of $('kind').children) c.setAttribute('aria-pressed', String(c === $('kind').firstElementChild));
+    $('after').classList.add('hidden'); $('form').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  });
+
+  // "הוספה למסך הבית": באנדרואיד כפתור אמיתי, באייפון הסבר
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (!standalone) {
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (ios) {
+      $('installText').textContent = 'בספארי לוחצים על כפתור השיתוף (הריבוע עם החץ) ← "הוספה למסך הבית".';
+      $('install').classList.add('show');
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      $('installText').textContent = 'לחיצה אחת, ויש אייקון בטלפון.';
+      $('installBtn').classList.remove('hidden');
+      $('install').classList.add('show');
+      $('installBtn').onclick = () => { e.prompt(); $('install').classList.remove('show'); };
+    });
+  }
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+</script>
+</body>
+</html>
